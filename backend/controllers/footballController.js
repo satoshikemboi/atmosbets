@@ -2,6 +2,11 @@ import axios from "axios";
 import dotenv from "dotenv";
 
 dotenv.config();
+// testers
+console.log("--- REBOOT DIAGNOSTIC ---");
+console.log("Is API_KEY string loaded?:", !!process.env.API_KEY);
+console.log("Raw Key Prefix:", process.env.API_KEY ? process.env.API_KEY.substring(0, 5) + "..." : "NONE");
+console.log("------------------------");
 
 const headers = {
   "x-rapidapi-key": process.env.API_KEY,
