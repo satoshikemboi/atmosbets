@@ -8,8 +8,8 @@ export const SEASON =
 export const AUTO_REFRESH_MS = 30_000;
 
 // Swap these for your real backend routes.
-export const FIXTURES_ENDPOINT = 'http://localhost:5000/api/football/fixtures';
-export const LIVE_ENDPOINT     = 'http://localhost:5000/api/football/live';
+export const FIXTURES_ENDPOINT = 'https://atmosbets.onrender.com/api/football/fixtures';
+export const LIVE_ENDPOINT     = 'https://atmosbets.onrender.com/api/football/live';
 
 export const LEAGUES = [
   { id: 'all',        label: 'All',            apiId: null },
