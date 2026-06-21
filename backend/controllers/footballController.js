@@ -44,6 +44,13 @@ export const getLiveMatches = async (req, res) => {
 // FIXTURES
 export const getFixtures = async (req, res) => {
   try {
+    // checking payload
+    console.log("BACKEND DETECTED KEY LENGTH:", process.env.API_KEY ? process.env.API_KEY.length : "ZERO/UNDEFINED");
+    console.log("BACKEND HEADERS BEING SENT:", {
+      "x-rapidapi-key": process.env.API_KEY ? "EXISTS" : "MISSING",
+      "x-apisports-key": process.env.API_KEY ? "EXISTS" : "MISSING"
+    });
+
     const {
       league = 39,
       season = 2026,
