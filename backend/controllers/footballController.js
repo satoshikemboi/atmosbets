@@ -6,6 +6,7 @@ dotenv.config();
 const headers = {
   "x-rapidapi-key": process.env.API_KEY,
   "x-rapidapi-host": "v3.football.api-sports.io",
+  "x-apisports-key": process.env.API_KEY,
 };
 
 // LIVE MATCHES

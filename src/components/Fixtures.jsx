@@ -109,6 +109,7 @@ export default function Fixtures() {
       if (!response.ok) throw new Error(`Request failed (${response.status})`);
 
       const payload   = await response.json();
+      console.log('RAW FIXTURES PAYLOAD!!:', payload); // Debugging line
       const formatted = formatFixturesResponse(payload).sort(
         (a, b) => new Date(a.date) - new Date(b.date)
       );
