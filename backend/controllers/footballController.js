@@ -23,7 +23,7 @@ export const getLiveMatches = async (req, res) => {
       }
     );
 
-    res.status(200).json(response.data);
+    res.status(200).json(response.data || { response: []});
 
   } catch (error) {
     console.log(
