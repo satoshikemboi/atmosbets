@@ -1,42 +1,77 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { PlaySquare, RefreshCw, Search } from 'lucide-react';
+import { PlaySquare, RefreshCw, Search, AlertCircle } from 'lucide-react';
+import {
+  SPORTS,
+  LIVE_ENDPOINT,
+  AUTO_REFRESH_MS,
+  formatLiveResponse,
+} from '../data/index.js';
 
-const SPORTS = [
-  { id: 'football', label: 'Football', emoji: '⚽' },
-  { id: 'basketball', label: 'Basketball', emoji: '🏀' },
-  { id: 'tennis', label: 'Tennis', emoji: '🎾' },
-  { id: 'baseball', label: 'Baseball', emoji: '⚾' },
-];
+function TeamCrest({ name, logo }) {
+  const [broken, setBroken] = useState(false);
 
-const AUTO_REFRESH_MS = 30000;
+  // Reset broken state when logo prop changes so a new valid URL is retried.
+  useEffect(() => {
+    setBroken(false);
+  }, [logo]);
 
-// Wire this up to your live-matches feed/socket. Empty by default to
-// reflect the "nothing live right now" state from the reference design.
-const LIVE_MATCHES = [];
+  if (logo && !broken) {
+    return (
+      <img
+        src={logo}
+        alt=""
+        onError={() => setBroken(true)}
+        className="h-7 w-7 shrink-0 rounded-full bg-white/5 object-contain"
+      />
+    );
+  }
+
+  return (
+    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/10 text-[10px] font-bold text-white/60">
+      {name?.slice(0, 2).toUpperCase()}
+    </span>
+  );
+}
 
 export default function Sports() {
   const [activeSport, setActiveSport] = useState('football');
   const [query, setQuery] = useState('');
+  const [matches, setMatches] = useState([]);
+  const [status, setStatus] = useState('loading');
+  const [errorMessage, setErrorMessage] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(Date.now());
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   const sport = SPORTS.find((s) => s.id === activeSport);
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
     setRefreshing(true);
-    // Replace with a real fetch/socket re-sync
-    setLastUpdated(Date.now());
-    const t = setTimeout(() => setRefreshing(false), 600);
-    return () => clearTimeout(t);
+    try {
+      const res = await fetch(LIVE_ENDPOINT);
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+
+      const payload = await res.json();
+      setMatches(formatLiveResponse(payload));
+      setStatus('success');
+      setLastUpdated(Date.now());
+    } catch (err) {
+      setStatus('error');
+      setErrorMessage(err.message || 'Something went wrong');
+    } finally {
+      setRefreshing(false);
+    }
   }, []);
 
   useEffect(() => {
+    refresh();
     const interval = setInterval(refresh, AUTO_REFRESH_MS);
     return () => clearInterval(interval);
   }, [refresh]);
 
-  const matches = LIVE_MATCHES.filter(
-    (m) => m.sport === activeSport && m.teams.toLowerCase().includes(query.toLowerCase())
+  const filteredMatches = matches.filter(
+    (m) =>
+      m.sport === activeSport &&
+      `${m.home.name} ${m.away.name}`.toLowerCase().includes(query.toLowerCase())
   );
 
   return (
@@ -48,9 +83,7 @@ export default function Sports() {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap');
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @media (prefers-reduced-motion: reduce) {
-          .live-ball { animation: none !important; }
-        }
+        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
       `}</style>
 
       <div className="mx-auto max-w-md">
@@ -63,7 +96,10 @@ export default function Sports() {
           <button
             type="button"
             onClick={refresh}
-            className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-semibold text-cyan-400 transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"
+            disabled={refreshing}
+            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-semibold text-cyan-400 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 ${
+              refreshing ? 'cursor-not-allowed opacity-50' : 'hover:text-white'
+            }`}
           >
             <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
             Refresh
@@ -81,7 +117,7 @@ export default function Sports() {
                 onClick={() => setActiveSport(s.id)}
                 className={`flex-none flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 ${
                   active
-                    ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-[#0a0e17] '
+                    ? 'bg-gradient-to-r from-cyan-400 to-violet-500 text-[#0a0e17] shadow-md shadow-violet-500/20'
                     : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 hover:text-white'
                 }`}
               >
@@ -94,7 +130,10 @@ export default function Sports() {
 
         {/* Search */}
         <div className="relative mt-4">
-          <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/35" />
+          <Search
+            size={16}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/35"
+          />
           <input
             type="text"
             value={query}
@@ -104,36 +143,103 @@ export default function Sports() {
           />
         </div>
 
-        {/* Results / empty state */}
-        {matches.length > 0 ? (
-          <ul className="mt-5 flex flex-col gap-2.5">
-            {matches.map((m) => (
+        {status === 'success' && lastUpdated && (
+          <p className="mt-2 text-right text-[11px] text-white/25">
+            Updated{' '}
+            {new Date(lastUpdated).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </p>
+        )}
+
+        {/* Loading skeleton */}
+        {status === 'loading' && (
+          <div className="mt-5 flex flex-col gap-2.5">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="h-[74px] rounded-2xl border border-white/10 bg-white/[0.03]"
+                style={{
+                  animation: 'pulse-soft 1.4s ease-in-out infinite',
+                  animationDelay: `${i * 0.15}s`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Error state */}
+        {status === 'error' && (
+          <div className="mt-16 flex flex-col items-center gap-3 text-center">
+            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-red-500/10">
+              <AlertCircle size={26} className="text-red-400" />
+            </div>
+            <p className="font-bold text-white/80">Couldn't load live matches</p>
+            <p className="max-w-[260px] text-sm text-white/40">{errorMessage}</p>
+            <button
+              type="button"
+              onClick={refresh}
+              className="mt-1 rounded-full border border-white/15 px-4 py-2 text-sm font-bold text-white/80 transition hover:bg-white/5 hover:text-white"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
+        {/* Matches */}
+        {status === 'success' && filteredMatches.length > 0 && (
+          <ul className="mt-4 flex flex-col gap-2.5">
+            {filteredMatches.map((m) => (
               <li
                 key={m.id}
-                className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"
+                className="rounded-2xl border border-white/10 bg-white/[0.04] p-3.5"
               >
-                <span className="text-sm font-semibold text-white">{m.teams}</span>
-                <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  {m.minute}'
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-white/35">
+                    {m.league || 'Football'}
+                  </span>
+                  <span className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    {typeof m.minute === 'number' ? `${m.minute}'` : m.status}
+                  </span>
+                </div>
+
+                <div className="mt-2.5 flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <TeamCrest name={m.home.name} logo={m.home.logo} />
+                    <span className="truncate text-sm font-semibold">{m.home.name}</span>
+                  </div>
+                  <span className="shrink-0 text-sm font-extrabold tabular-nums">
+                    {m.home.score ?? 0}
+                  </span>
+                </div>
+
+                <div className="mt-1.5 flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <TeamCrest name={m.away.name} logo={m.away.logo} />
+                    <span className="truncate text-sm font-semibold">{m.away.name}</span>
+                  </div>
+                  <span className="shrink-0 text-sm font-extrabold tabular-nums">
+                    {m.away.score ?? 0}
+                  </span>
+                </div>
               </li>
             ))}
           </ul>
-        ) : (
+        )}
+
+        {/* Empty state */}
+        {status === 'success' && filteredMatches.length === 0 && (
           <div className="mt-16 flex flex-col items-center gap-3 text-center">
             <div className="relative grid h-20 w-20 place-items-center rounded-full bg-white/5">
               <span
-                className="absolute h-20 w-20 rounded-full"
+                className="absolute h-20 w-20 rounded-full bg-gradient-to-br from-cyan-400/20 to-violet-500/20 blur-xl"
                 aria-hidden="true"
               />
-              <span className="live-ball relative text-4xl" style={{ animation: 'bounce 2.4s ease-in-out infinite' }}>
-                {sport.emoji}
-              </span>
+              <span className="relative text-4xl">{sport.emoji}</span>
             </div>
-            <p className="font-bold text-white/80">
-              No live {sport.label} matches right now
-            </p>
+            <p className="font-bold text-white/80">No live {sport.label} matches right now</p>
             <p className="text-sm text-white/40">Refreshes every 30 seconds</p>
           </div>
         )}

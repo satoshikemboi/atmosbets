@@ -111,13 +111,14 @@ export default function Profile({ onLogout }) {
           </p>
 
           <div className="mt-4 flex gap-2.5">
-            <button
+            <Link
+                to="/deposit"
               type="button"
               className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 py-2.5 text-sm font-bold text-[#1a1206] shadow-md shadow-orange-500/20 transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
             >
               <ArrowDownCircle size={15} />
               Deposit
-            </button>
+            </Link>
             <button
               type="button"
               className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/15 py-2.5 text-sm font-bold text-white/80 transition hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"

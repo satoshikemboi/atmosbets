@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, Menu, X, Radio, WalletIcon } from 'lucide-react';
 
 const NAV_LINKS = [
@@ -104,9 +105,11 @@ export default function Navbar() {
         </div>
 
         <div className='mx-2 md:hidden flex items-center gap-4'>
-        <div className='md:flex items-center gap-2'>
+        <Link 
+           to="/wallet"
+           className='md:flex items-center gap-2'>
             <WalletIcon size={24} className="text-white/70" />
-        </div>
+        </Link>
 
         {/* Mobile menu toggle */}
         <button

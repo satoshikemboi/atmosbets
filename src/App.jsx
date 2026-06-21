@@ -2,12 +2,13 @@ import Navbar from "./components/Navbar";
 import BottomNav from "./components/BottomNav";
 
 import Hero from "./components/Hero";
-import QuickFilters from "./components/QuickFilters";
+import Fixtures from "./components/Fixtures";
 
 import Sports from "./pages/Sports";
 import Slip from "./pages/Slip";
 import Profile from "./pages/Profile";
 import Deposit from "./pages/Deposit";
+import Wallet from "./pages/Wallet";
 
 import { Routes, Route } from "react-router-dom";
 
@@ -15,7 +16,7 @@ function Home() {
   return (
     <>
       <Hero autoPlayMs={6000} />
-      <QuickFilters />
+      <Fixtures />
     </>
   );
 }
@@ -32,6 +33,7 @@ function App() {
           <Route path="/betslip" element={<Slip />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/deposit" element={<Deposit />} />
+          <Route path="/wallet" element={<Wallet />} />
         </Routes>
       </main>
 
