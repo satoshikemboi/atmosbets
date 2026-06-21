@@ -1,6 +1,6 @@
-import { FIXTURES_ENDPOINT, SEASON } from './constants.js';
+import { FIXTURES_ENDPOINT, LIVE_ENDPOINT, LINEUPS_ENDPOINT, SEASON } from './constants.js';
 
-// ─── URL builder ─────────────────────────────────────────────────────────────
+// ─── URL builders ────────────────────────────────────────────────────────────
 
 /** Builds the fixtures query URL for a given league (or all leagues). */
 export function buildFixturesUrl(league) {
@@ -10,20 +10,25 @@ export function buildFixturesUrl(league) {
   return `${FIXTURES_ENDPOINT}?${params.toString()}`;
 }
 
+/** NEW: Builds the url to get lineups for a specific match fixture ID */
+export function buildLineupsUrl(fixtureId) {
+  if (!fixtureId) return '';
+  return `${LINEUPS_ENDPOINT}?fixture=${fixtureId}`;
+}
+
 // ─── Response shapers ────────────────────────────────────────────────────────
 
 /**
- * Shapes a raw API-Football /fixtures response into the format Fixtures.jsx
- * expects. Accepts the full JSON payload (with a .response array).
+ * Shapes a raw API-Football /fixtures response into the format Fixtures.jsx expects.
  */
 export function formatFixturesResponse(payload) {
   if (!payload?.response) throw new Error('Invalid API response');
 
   return payload.response.map((fx) => ({
     id:     fx?.fixture?.id ?? crypto.randomUUID(),
-    league: fx?.league?.name            ?? '',
-    date:   fx?.fixture?.date           ?? null,
-    status: fx?.fixture?.status?.short  ?? 'NS',
+    league: fx?.league?.name           ?? '',
+    date:   fx?.fixture?.date          ?? null,
+    status: fx?.fixture?.status?.short ?? 'NS',
     home: {
       name:  fx?.teams?.home?.name  ?? 'Unknown',
       logo:  fx?.teams?.home?.logo  ?? '',
@@ -39,7 +44,6 @@ export function formatFixturesResponse(payload) {
 
 /**
  * Shapes a raw API-Football live response into the format Sports.jsx expects.
- * Gracefully handles missing fields with safe fallbacks.
  */
 export function formatLiveResponse(payload) {
   return (payload?.response ?? []).map((fx) => ({
@@ -61,11 +65,49 @@ export function formatLiveResponse(payload) {
   }));
 }
 
+/**
+ * NEW: Shapes raw API-Football lineups response into UI-friendly structure.
+ * Handles extracting the formation, Starting XI, and Bench (substitutes).
+ */
+export function formatLineupsResponse(payload) {
+  if (!payload?.response || payload.response.length === 0) {
+    return { home: null, away: null };
+  }
+
+  // API-Football returns an array where item 0 is Home and item 1 is Away
+  const homeRaw = payload.response[0];
+  const awayRaw = payload.response[1];
+
+  const mapSquad = (squadArray) => 
+    (squadArray ?? []).map(p => ({
+      id: p.player?.id,
+      name: p.player?.name,
+      number: p.player?.number,
+      position: p.player?.pos // 'G', 'D', 'M', 'F'
+    }));
+
+  return {
+    home: {
+      teamName: homeRaw?.team?.name ?? 'Home Team',
+      formation: homeRaw?.formation ?? 'N/A',
+      coach: homeRaw?.coach?.name ?? 'Unknown',
+      starters: mapSquad(homeRaw?.startXI),
+      bench: mapSquad(homeRaw?.substitutes) // Grabs the substitutes list
+    },
+    away: {
+      teamName: awayRaw?.team?.name ?? 'Away Team',
+      formation: awayRaw?.formation ?? 'N/A',
+      coach: awayRaw?.coach?.name ?? 'Unknown',
+      starters: mapSquad(awayRaw?.startXI),
+      bench: mapSquad(awayRaw?.substitutes)
+    }
+  };
+}
+
 // ─── Display helpers ─────────────────────────────────────────────────────────
 
 /**
  * Converts an ISO date string to a human-readable kickoff label.
- * Returns 'TBD' for null, empty, or invalid values.
  */
 export function formatKickoff(isoDate) {
   if (!isoDate) return 'TBD';

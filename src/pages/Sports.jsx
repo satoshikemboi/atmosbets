@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { PlaySquare, RefreshCw, Search, AlertCircle } from 'lucide-react';
+import { PlaySquare, RefreshCw, Search, AlertCircle, Users } from 'lucide-react';
 import {
   SPORTS,
   LIVE_ENDPOINT,
   AUTO_REFRESH_MS,
   formatLiveResponse,
+  // --- NEW SQUAD UTILS FOR THE LIVE ACCORDION PANEL ---
+  buildLineupsUrl,
+  formatLineupsResponse
 } from '../data/index.js';
 
 function TeamCrest({ name, logo }) {
   const [broken, setBroken] = useState(false);
 
-  // Reset broken state when logo prop changes so a new valid URL is retried.
   useEffect(() => {
     setBroken(false);
   }, [logo]);
@@ -33,6 +35,49 @@ function TeamCrest({ name, logo }) {
   );
 }
 
+// ─── SQUAD COLUMN RENDERER FOR LIVE FIXTURES ────────────────────────────────
+function LiveSquadColumn({ teamData, title }) {
+  if (!teamData || !teamData.starters?.length) {
+    return <div className="text-xs text-white/30 italic py-2">Lineup unconfirmed</div>;
+  }
+
+  return (
+    <div className="flex-1 min-w-0">
+      <div className="mb-2">
+        <h4 className="text-xs font-bold text-white/80 truncate">{teamData.teamName}</h4>
+        <p className="text-[10px] text-cyan-400 font-semibold">{teamData.formation} · {teamData.coach}</p>
+      </div>
+      
+      <div className="space-y-2">
+        <div>
+          <span className="text-[9px] uppercase tracking-wider text-white/30 font-bold block mb-1">{title} XI</span>
+          <div className="space-y-0.5 max-h-36 overflow-y-auto no-scrollbar bg-black/30 p-1.5 rounded-lg border border-white/5">
+            {teamData.starters.map((p) => (
+              <div key={p.id || p.name} className="flex gap-1.5 text-xs py-0.5 truncate">
+                <span className="text-cyan-400 font-bold w-4 text-right shrink-0">{p.number ?? '-'}</span>
+                <span className="text-white/70 truncate">{p.name}</span>
+                <span className="text-[9px] text-white/30 ml-auto uppercase font-bold shrink-0">{p.position}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[9px] uppercase tracking-wider text-white/30 font-bold block mb-1">Subs</span>
+          <div className="space-y-0.5 max-h-24 overflow-y-auto no-scrollbar bg-black/30 p-1.5 rounded-lg border border-white/5">
+            {teamData.bench.map((p) => (
+              <div key={p.id || p.name} className="flex gap-1.5 text-xs py-0.5 truncate">
+                <span className="text-white/40 font-bold w-4 text-right shrink-0">{p.number ?? '-'}</span>
+                <span className="text-white/60 truncate">{p.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Sports() {
   const [activeSport, setActiveSport] = useState('football');
   const [query, setQuery] = useState('');
@@ -41,6 +86,11 @@ export default function Sports() {
   const [errorMessage, setErrorMessage] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+
+  // --- NEW STATES FOR INTERACTIVE LIVE DRAWERS ---
+  const [selectedMatchId, setSelectedMatchId] = useState(null);
+  const [squadData, setSquadData] = useState(null);
+  const [squadLoading, setSquadLoading] = useState(false);
 
   const sport = SPORTS.find((s) => s.id === activeSport);
 
@@ -67,6 +117,35 @@ export default function Sports() {
     const interval = setInterval(refresh, AUTO_REFRESH_MS);
     return () => clearInterval(interval);
   }, [refresh]);
+
+  // --- NEW LAZY FETCH ROUTINE FOR EXPANDING SQUADS ---
+  const handleToggleSquads = async (matchId) => {
+    if (selectedMatchId === matchId) {
+      setSelectedMatchId(null);
+      return;
+    }
+
+    setSelectedMatchId(matchId);
+    setSquadLoading(true);
+    setSquadData(null);
+
+    try {
+      const res = await fetch(buildLineupsUrl(matchId));
+      if (!res.ok) throw new Error();
+      const rawPayload = await res.json();
+      setSquadData(formatLineupsResponse(rawPayload));
+    } catch (err) {
+      setSquadData({ home: null, away: null });
+    } finally {
+      setSquadLoading(false);
+    }
+  };
+
+  // Reset selected match when swapping sports tabs
+  const handleSportChange = (sportId) => {
+    setActiveSport(sportId);
+    setSelectedMatchId(null);
+  };
 
   const filteredMatches = matches.filter(
     (m) =>
@@ -114,7 +193,7 @@ export default function Sports() {
               <button
                 key={s.id}
                 type="button"
-                onClick={() => setActiveSport(s.id)}
+                onClick={() => handleSportChange(s.id)}
                 className={`flex-none flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 ${
                   active
                     ? 'bg-gradient-to-r from-cyan-400 to-violet-500 text-[#0a0e17] shadow-md shadow-violet-500/20'
@@ -190,42 +269,80 @@ export default function Sports() {
         {/* Matches */}
         {status === 'success' && filteredMatches.length > 0 && (
           <ul className="mt-4 flex flex-col gap-2.5">
-            {filteredMatches.map((m) => (
-              <li
-                key={m.id}
-                className="rounded-2xl border border-white/10 bg-white/[0.04] p-3.5"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-white/35">
-                    {m.league || 'Football'}
-                  </span>
-                  <span className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    {typeof m.minute === 'number' ? `${m.minute}'` : m.status}
-                  </span>
-                </div>
+            {filteredMatches.map((m) => {
+              const isDrawerOpen = selectedMatchId === m.id;
+              return (
+                <li
+                  key={m.id}
+                  className={`rounded-2xl border transition-all duration-200 cursor-pointer overflow-hidden ${
+                    isDrawerOpen ? 'border-cyan-500/40 bg-white/[0.06]' : 'border-white/10 bg-white/[0.04]'
+                  }`}
+                  onClick={() => handleToggleSquads(m.id)}
+                >
+                  {/* Top Summary Info */}
+                  <div className="p-3.5 pb-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-white/35 truncate max-w-[70%]">
+                        {m.league || 'Football'}
+                      </span>
+                      <span className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 shrink-0">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        {typeof m.minute === 'number' ? `${m.minute}'` : m.status}
+                      </span>
+                    </div>
 
-                <div className="mt-2.5 flex items-center justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <TeamCrest name={m.home.name} logo={m.home.logo} />
-                    <span className="truncate text-sm font-semibold">{m.home.name}</span>
-                  </div>
-                  <span className="shrink-0 text-sm font-extrabold tabular-nums">
-                    {m.home.score ?? 0}
-                  </span>
-                </div>
+                    <div className="mt-2.5 flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <TeamCrest name={m.home.name} logo={m.home.logo} />
+                        <span className="truncate text-sm font-semibold">{m.home.name}</span>
+                      </div>
+                      <span className="shrink-0 text-sm font-extrabold tabular-nums">
+                        {m.home.score ?? 0}
+                      </span>
+                    </div>
 
-                <div className="mt-1.5 flex items-center justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <TeamCrest name={m.away.name} logo={m.away.logo} />
-                    <span className="truncate text-sm font-semibold">{m.away.name}</span>
+                    <div className="mt-1.5 flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <TeamCrest name={m.away.name} logo={m.away.logo} />
+                        <span className="truncate text-sm font-semibold">{m.away.name}</span>
+                      </div>
+                      <span className="shrink-0 text-sm font-extrabold tabular-nums">
+                        {m.away.score ?? 0}
+                      </span>
+                    </div>
+
+                    {/* Interactive Lineup Action Hint */}
+                    {activeSport === 'football' && (
+                      <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-center gap-1 text-[10px] font-bold text-white/25 hover:text-cyan-400 transition">
+                        <Users size={11} />
+                        {isDrawerOpen ? 'Close Lineup Details' : 'Tap to View Lineups'}
+                      </div>
+                    )}
                   </div>
-                  <span className="shrink-0 text-sm font-extrabold tabular-nums">
-                    {m.away.score ?? 0}
-                  </span>
-                </div>
-              </li>
-            ))}
+
+                  {/* --- EXPANDABLE LINEUP PANEL --- */}
+                  {isDrawerOpen && activeSport === 'football' && (
+                    <div 
+                      className="border-t border-white/10 bg-black/20 p-3.5 pt-2.5 flex gap-4 transition-all"
+                      onClick={(e) => e.stopPropagation()} // Guard click events
+                    >
+                      {squadLoading ? (
+                        <div className="w-full py-6 flex flex-col items-center justify-center gap-2 text-white/30 text-xs font-semibold">
+                          <RefreshCw size={13} className="animate-spin text-cyan-400" />
+                          Loading Live Squad configurations...
+                        </div>
+                      ) : (
+                        <>
+                          <LiveSquadColumn teamData={squadData?.home} title="Starting" />
+                          <div className="w-[1px] bg-white/5 self-stretch" />
+                          <LiveSquadColumn teamData={squadData?.away} title="Starting" />
+                        </>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
 
