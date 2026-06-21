@@ -62,7 +62,7 @@ export const getFixtures = async (req, res) => {
     } = req.query;
 
     const response = await axios.get(
-      "https://v3.football.api-sports.io/fixtures",
+      "https://api-football.v3.api-sports.io/fixtures",
       {
         headers,
         params: {
