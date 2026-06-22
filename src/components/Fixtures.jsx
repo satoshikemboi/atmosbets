@@ -13,12 +13,12 @@ function TeamCrest({ name, logo }) {
         src={logo}
         alt=""
         onError={() => setBroken(true)}
-        className="h-8 w-8 shrink-0 rounded-full object-contain bg-gray-50 border border-gray-100 p-0.5"
+        className="h-8 w-8 shrink-0"
       />
     );
   }
   return (
-    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gray-100 text-[10px] font-bold text-gray-500 border border-gray-200">
+    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/[0.07] text-[10px] font-bold text-white/50 border border-white/10">
       {name?.slice(0, 2).toUpperCase()}
     </span>
   );
@@ -26,18 +26,18 @@ function TeamCrest({ name, logo }) {
 
 // ─── MATCH CARD ───────────────────────────────────────────────────────────────
 function MatchCard({ m, formatKickoff }) {
-  const isLive    = m.status === 'IN_PLAY' || m.status === 'PAUSED';
+  const isLive     = m.status === 'IN_PLAY' || m.status === 'PAUSED';
   const isFinished = m.status === 'FINISHED';
 
   const statusBadge = isLive ? (
-    <span className="flex items-center gap-1 text-[10px] font-extrabold text-emerald-500 uppercase tracking-wider animate-pulse">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
+    <span className="flex items-center gap-1 text-[10px] font-extrabold text-green-400 uppercase tracking-wider animate-pulse">
+      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block" />
       Live
     </span>
   ) : isFinished ? (
-    <span className="text-[11px] font-bold text-gray-400 tracking-wide">FT</span>
+    <span className="text-[11px] font-bold text-white/30 tracking-wide">FT</span>
   ) : (
-    <span className="text-[11px] font-semibold text-blue-500">{formatKickoff(m.date)}</span>
+    <span className="text-[11px] font-semibold text-orange-400">{formatKickoff(m.date)}</span>
   );
 
   const homeScore = m.home.score ?? (isFinished ? '0' : '–');
@@ -45,14 +45,16 @@ function MatchCard({ m, formatKickoff }) {
 
   return (
     <div
-      className={`rounded-2xl bg-white overflow-hidden ${
-        isLive ? 'ring-1 ring-emerald-300 shadow-sm shadow-emerald-100' : 'shadow-[0_1px_6px_rgba(0,0,0,0.07)]'
+      className={`rounded-lg overflow-hidden ${
+        isLive
+          ? 'bg-white/[0.06] ring-1 ring-emerald-500/30 shadow-lg shadow-emerald-500/5'
+          : 'bg-white/[0.04] border border-white/[0.07]'
       }`}
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
-      {/* ── Header strip: League | Status ── */}
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-100">
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">{m.league}</span>
+      {/* ── Header strip ── */}
+      <div className="flex items-center justify-between px-4 py-2 bg-white/[0.03] border-b border-white/[0.05]">
+        <span className="text-[10px] font-extrabold uppercase tracking-widest text-white/30">{m.league}</span>
         {statusBadge}
       </div>
 
@@ -62,35 +64,35 @@ function MatchCard({ m, formatKickoff }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <TeamCrest name={m.home.name} logo={m.home.logo} />
-            <span className="text-[13.5px] font-semibold text-gray-900 truncate">{m.home.name}</span>
+            <span className="text-[13.5px] font-semibold text-white truncate">{m.home.name}</span>
           </div>
-          <span className="text-[15px] font-extrabold text-gray-900 tabular-nums ml-3">{homeScore}</span>
+          <span className="text-[15px] font-extrabold text-white tabular-nums ml-3">{homeScore}</span>
         </div>
 
         {/* Divider */}
-        <div className="my-2.5 border-t border-gray-100 ml-[42px]" />
+        <div className="my-2.5 border-t border-white/[0.06] ml-[42px]" />
 
         {/* Away */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <TeamCrest name={m.away.name} logo={m.away.logo} />
-            <span className="text-[13.5px] font-semibold text-gray-900 truncate">{m.away.name}</span>
+            <span className="text-[13.5px] font-semibold text-white truncate">{m.away.name}</span>
           </div>
-          <span className="text-[15px] font-extrabold text-gray-900 tabular-nums ml-3">{awayScore}</span>
+          <span className="text-[15px] font-extrabold text-white tabular-nums ml-3">{awayScore}</span>
         </div>
       </div>
 
-      {/* ── Footer: FULL TIME · big score · Details ── */}
-      <div className="flex items-center justify-between px-4 py-2.5 mt-1 border-t border-gray-100">
-        <span className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-gray-400 w-16">
+      {/* ── Footer ── */}
+      <div className="flex items-center justify-between px-4 py-2.5 mt-1 border-t border-white/[0.05]">
+        <span className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-white/25 w-16">
           {isLive ? 'Live' : isFinished ? 'Full Time' : 'Kickoff'}
         </span>
-        <span className="text-base font-black tabular-nums text-gray-800">
+        <span className="text-base font-black tabular-nums text-white/80">
           {isFinished || isLive
             ? `${homeScore} – ${awayScore}`
             : formatKickoff(m.date)}
         </span>
-        <button className="flex items-center gap-0.5 text-[11px] font-semibold text-blue-500 w-16 justify-end">
+        <button className="flex items-center gap-0.5 text-[11px] font-semibold text-orange-400 w-16 justify-end hover:text-orange-300 transition">
           Details <ChevronRight size={11} strokeWidth={2.5} />
         </button>
       </div>
@@ -102,15 +104,12 @@ function MatchCard({ m, formatKickoff }) {
 function LeagueGroup({ leagueName, matches, formatKickoff }) {
   return (
     <div>
-      {/* Group header */}
       <div className="flex items-center justify-between mb-2.5 px-0.5">
-        <span className="text-[11px] font-black uppercase tracking-[0.12em] text-gray-900">{leagueName}</span>
-        <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gray-800 px-1 text-[9px] font-extrabold text-white">
+        <span className="text-[11px] font-black uppercase tracking-[0.12em] text-white/60">{leagueName}</span>
+        <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-white/10 px-1 text-[9px] font-extrabold text-white/50">
           {matches.length}
         </span>
       </div>
-
-      {/* Cards */}
       <div className="space-y-2">
         {matches.map((m) => (
           <MatchCard key={m.id} m={m} formatKickoff={formatKickoff} />
@@ -129,10 +128,9 @@ export default function Matches() {
   const [refreshing, setRefreshing]         = useState(false);
   const [resultsVisible, setResultsVisible] = useState(true);
 
-  const abortRef    = useRef(null);
+  const abortRef     = useRef(null);
   const activeLeague = LEAGUES.find((l) => l.id === activeLeagueId) || LEAGUES[0];
 
-  // ── Kickoff formatter ──
   const formatKickoff = (isoDate) => {
     if (!isoDate) return 'TBD';
     const date = new Date(isoDate);
@@ -146,7 +144,6 @@ export default function Matches() {
     return `${day} · ${time}`;
   };
 
-  // ── Fetch ──
   const fetchMatchTimeline = useCallback(async (league) => {
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
@@ -203,10 +200,9 @@ export default function Matches() {
     return () => { if (abortRef.current) abortRef.current.abort(); };
   }, [activeLeague, fetchMatchTimeline]);
 
-  // ── Partition + group ──
-  const finished  = matches.filter(m => m.status === 'FINISHED');
-  const live      = matches.filter(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
-  const upcoming  = matches.filter(m => !['FINISHED','IN_PLAY','PAUSED'].includes(m.status));
+  const finished = matches.filter(m => m.status === 'FINISHED');
+  const live     = matches.filter(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
+  const upcoming = matches.filter(m => !['FINISHED', 'IN_PLAY', 'PAUSED'].includes(m.status));
 
   const groupByLeague = (arr) =>
     arr.reduce((acc, m) => {
@@ -216,7 +212,7 @@ export default function Matches() {
 
   return (
     <div
-      className="min-h-screen w-full bg-[#f0f1f6] px-4 pb-28 pt-5 text-gray-900"
+      className="min-h-screen w-full bg-[#0a0e17] px-4 pb-28 pt-5 text-white"
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
       <div className="mx-auto max-w-md space-y-5">
@@ -227,10 +223,10 @@ export default function Matches() {
             <button
               key={l.id}
               onClick={() => setActiveLeagueId(l.id)}
-              className={`flex-none rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+              className={`flex-none rounded-full px-3.5 py-2 text-xs font-semibold transition-all ${
                 activeLeagueId === l.id
-                  ? 'bg-gray-900 text-white shadow'
-                  : 'bg-white text-gray-500 shadow-sm hover:bg-gray-50'
+                  ? 'bg-linear-to-r from bg-orange-500 to bg-orange-500  text-gray-100 shadow-lg shadow-orange-500/25'
+                  : 'bg-white/[0.06] text-gray-200 hover:bg-white/10 hover:text-white/80'
               }`}
             >
               {l.label}
@@ -240,9 +236,9 @@ export default function Matches() {
           <button
             onClick={() => fetchMatchTimeline(activeLeague)}
             disabled={refreshing}
-            className="flex-none ml-auto flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs font-bold text-gray-500 shadow-sm hover:bg-gray-50 transition"
+            className="flex-none ml-auto flex items-center gap-1.5 rounded-xl bg-white/[0.06] px-3 py-2 text-xs font-bold text-white/50 hover:bg-white/10 hover:text-white/80 transition"
           >
-            <RefreshCw size={12} className={refreshing ? 'animate-spin text-blue-500' : ''} />
+            <RefreshCw size={12} className={refreshing ? 'animate-spin text-orange-400' : ''} />
             Sync
           </button>
         </div>
@@ -251,7 +247,7 @@ export default function Matches() {
         {status === 'loading' && (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-36 rounded-2xl bg-white/80 animate-pulse shadow-sm" />
+              <div key={i} className="h-36 rounded-2xl bg-white/[0.04] animate-pulse border border-white/[0.06]" />
             ))}
           </div>
         )}
@@ -260,10 +256,10 @@ export default function Matches() {
         {status === 'error' && (
           <div className="mt-16 flex flex-col items-center gap-2 text-center">
             <AlertCircle size={22} className="text-red-400" />
-            <p className="text-sm font-semibold text-gray-500">{errorMessage}</p>
+            <p className="text-sm font-semibold text-white/40">{errorMessage}</p>
             <button
               onClick={() => fetchMatchTimeline(activeLeague)}
-              className="mt-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-gray-700 shadow-sm"
+              className="mt-2 rounded-xl bg-orange-500 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-orange-500/25 hover:bg-orange-400 transition"
             >
               Try again
             </button>
@@ -273,12 +269,12 @@ export default function Matches() {
         {/* ── Content ── */}
         {status === 'success' && matches.length > 0 && (
           <>
-            {/* LIVE section */}
+            {/* LIVE */}
             {live.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-2.5 px-0.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-sm font-black text-gray-900">Live ({live.length})</span>
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-sm font-black text-white">Live ({live.length})</span>
                 </div>
                 <div className="space-y-4">
                   {Object.entries(groupByLeague(live)).map(([league, ms]) => (
@@ -288,18 +284,17 @@ export default function Matches() {
               </div>
             )}
 
-            {/* RESULTS section */}
+            {/* RESULTS */}
             {finished.length > 0 && (
               <div>
-                {/* Section header */}
                 <div className="flex items-center justify-between mb-2.5 px-0.5">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={15} className="text-gray-500" strokeWidth={2.5} />
-                    <span className="text-sm font-black text-gray-900">Results ({finished.length})</span>
+                    <CheckCircle2 size={15} className="text-white/30" strokeWidth={2.5} />
+                    <span className="text-sm font-black text-white">Results ({finished.length})</span>
                   </div>
                   <button
                     onClick={() => setResultsVisible((v) => !v)}
-                    className="text-[12px] font-semibold text-blue-500"
+                    className="text-[12px] font-semibold text-orange-400 hover:text-orange-300 transition"
                   >
                     {resultsVisible ? 'Hide' : 'Show'}
                   </button>
@@ -315,11 +310,11 @@ export default function Matches() {
               </div>
             )}
 
-            {/* UPCOMING section */}
+            {/* UPCOMING */}
             {upcoming.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-2.5 px-0.5">
-                  <span className="text-sm font-black text-gray-900">Upcoming ({upcoming.length})</span>
+                  <span className="text-sm font-black text-white">Upcoming ({upcoming.length})</span>
                 </div>
                 <div className="space-y-5">
                   {Object.entries(groupByLeague(upcoming)).map(([league, ms]) => (
@@ -333,7 +328,7 @@ export default function Matches() {
 
         {/* ── Empty state ── */}
         {status === 'success' && matches.length === 0 && (
-          <div className="mt-20 text-center text-sm font-medium text-gray-400">
+          <div className="mt-20 text-center text-sm font-medium text-white/30">
             No matches found for {activeLeague.label}
           </div>
         )}

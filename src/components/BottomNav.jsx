@@ -32,7 +32,7 @@ export default function BottomNav({ betSlipCount = 2 }) {
               <>
                 <span
                   className={`relative grid h-7 w-7 place-items-center transition-colors ${
-                    isActive ? "text-cyan-400" : "text-white/45"
+                    isActive ? "text-gray-200" : "text-white/45"
                   }`}
                 >
                   {item.icon ? (
@@ -52,7 +52,7 @@ export default function BottomNav({ betSlipCount = 2 }) {
 
                   {item.path === "/betslip" &&
                     betSlipCount > 0 && (
-                      <span className="absolute -right-2 -top-1.5 grid h-4 min-w-[16px] place-items-center rounded-full bg-gradient-to-r from-orange-400 to-orange-500 px-1 text-[9px] font-bold text-[#1a1206]">
+                      <span className="absolute -right-2 -top-1.5 grid h-4 min-w-[16px] place-items-center rounded-full bg-linear-to-r from-orange-400 to-orange-500 px-1 text-[9px] font-bold text-[#1a1206]">
                         {betSlipCount}
                       </span>
                     )}
@@ -61,7 +61,7 @@ export default function BottomNav({ betSlipCount = 2 }) {
                 <span
                   className={`text-[11px] leading-none transition-colors ${
                     isActive
-                      ? "font-bold text-cyan-400"
+                      ? "font-bold text-orange-400"
                       : "font-semibold text-white/45"
                   }`}
                 >
@@ -69,7 +69,7 @@ export default function BottomNav({ betSlipCount = 2 }) {
                 </span>
 
                 {isActive && (
-                  <span className="absolute top-0 h-0.5 w-8 rounded-full bg-gradient-to-r from-cyan-300 to-violet-400" />
+                  <span className="absolute top-0 h-0.5 w-8 rounded-full bg-linear-to-r from-orange-300 to-orange-400" />
                 )}
               </>
             )}
