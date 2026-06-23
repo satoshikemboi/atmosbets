@@ -32,7 +32,7 @@ function MatchCard({ m }) {
 
   return (
     <div
-      className="rounded-lg bg-white/[0.06] overflow-hidden ring-1 ring-emerald-500/30 shadow-lg shadow-emerald-500/5"
+      className="rounded-lg bg-gray-800 overflow-hidden ring-1 ring-emerald-500/30 shadow-lg shadow-emerald-500/5"
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
       {/* ── Header strip: League | Live minute ── */}
@@ -149,7 +149,7 @@ export default function Sports() {
 
   return (
     <div
-      className="min-h-screen w-full bg-[#0a0e17] px-4 pb-28 pt-5 text-white"
+      className="min-h-screen w-full bg-gray-900 px-4 pb-28 pt-5 text-white"
       style={{ fontFamily: "'Inter', ui-sans-serif, system-ui" }}
     >
       <div className="mx-auto max-w-md space-y-4">
@@ -196,12 +196,12 @@ export default function Sports() {
           <div className="flex items-center justify-between px-0.5">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-sm font-black text-white">
+              <span className="text-sm font-semibold text-gray-100">
                 Live Now ({filtered.length})
               </span>
             </div>
             {lastUpdated && (
-              <span className="text-[10px] font-medium text-white/30">
+              <span className="text-[10px] font-semibold leading-tight text-white/30">
                 {new Date(lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}

@@ -212,7 +212,7 @@ export default function Matches() {
 
   return (
     <div
-      className="min-h-screen w-full bg-[#0a0e17] px-4 pb-28 pt-5 text-white"
+      className="min-h-screen w-full bg-gray-900 px-4 pb-28 pt-5 text-white"
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
       <div className="mx-auto max-w-md space-y-5">
@@ -226,7 +226,7 @@ export default function Matches() {
               className={`flex-none rounded-full px-3.5 py-2 text-xs font-semibold transition-all ${
                 activeLeagueId === l.id
                   ? 'bg-linear-to-r from bg-orange-500 to bg-orange-500  text-gray-100 shadow-lg shadow-orange-500/25'
-                  : 'bg-white/[0.06] text-gray-200 hover:bg-white/10 hover:text-white/80'
+                  : 'bg-gray-800 text-gray-200 hover:bg-white/10 hover:text-white/80'
               }`}
             >
               {l.label}

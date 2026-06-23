@@ -68,7 +68,7 @@ function MenuRow({ icon: Icon, label, badge, onClick }) {
 export default function Profile({ onLogout }) {
   return (
     <div
-      className="min-h-screen w-full bg-[#0a0e17] px-4 pb-24 pt-6 text-white"
+      className="min-h-screen w-full bg-gray-900 px-4 pb-24 pt-6 text-white"
       style={{ fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}
     >
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap');`}</style>
@@ -101,12 +101,12 @@ export default function Profile({ onLogout }) {
         </div>
 
         {/* Balance */}
-        <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+        <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.04] p-4">
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-white/40">
             <Wallet size={13} />
             Available Balance
           </div>
-          <p className="mt-1.5 text-3xl font-extrabold tracking-tight">
+          <p className="mt-1.5 text-2xl font-extrabold tracking-tight">
             ${USER.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </p>
 
@@ -114,14 +114,14 @@ export default function Profile({ onLogout }) {
             <Link
                 to="/deposit"
               type="button"
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 py-2.5 text-sm font-bold text-[#1a1206] shadow-md shadow-orange-500/20 transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 py-2 text-md font-semibold text-[#1a1206] shadow-md shadow-orange-500/20 transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
             >
               <ArrowDownCircle size={15} />
               Deposit
             </Link>
             <button
               type="button"
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/15 py-2.5 text-sm font-bold text-white/80 transition hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/15 py-2 text-md font-semibold text-white/80 transition hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"
             >
               <ArrowUpCircle size={15} />
               Withdraw
@@ -129,28 +129,11 @@ export default function Profile({ onLogout }) {
           </div>
         </div>
 
-        {/* Quick stats */}
-        <div className="mt-4 grid grid-cols-3 gap-2.5">
-          {[
-            { label: 'Bets Placed', value: USER.betsPlaced },
-            { label: 'Win Rate', value: USER.winRate },
-            { label: 'Member Since', value: USER.memberSince },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-2xl border border-white/10 bg-white/[0.04] py-3 text-center"
-            >
-              <p className="text-base font-extrabold tracking-tight">{stat.value}</p>
-              <p className="mt-0.5 text-[11px] text-white/40">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-
         {/* Account menu */}
         <p className="mb-1 mt-7 px-1 text-xs font-bold uppercase tracking-wide text-white/30">
           Account
         </p>
-        <div className="rounded-2xl border border-white/10 bg-white/[0.02]">
+        <div className="rounded-lg border border-white/10 bg-white/[0.02]">
           {ACCOUNT_ITEMS.map((item, i) => (
             <React.Fragment key={item.id}>
               <MenuRow icon={item.icon} label={item.label} badge={item.badge} />

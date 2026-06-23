@@ -109,18 +109,18 @@ function BookingCodePanel({ onAddSelections }) {
       <button
         type="button"
         onClick={handleOpen}
-        className="mt-8 flex w-full items-center justify-between rounded-2xl border border-dashed border-white/15 bg-white/[0.03] px-4 py-3.5 text-left transition hover:border-white/25 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2"
+        className="mt-8 flex w-full items-center justify-between rounded-xl border border-dashed border-gray-400 bg-gray-900 px-4 py-3.5 text-left transition hover:border-white/25 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2"
       >
         <div className="flex items-center gap-3">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/[0.07]">
             <QrCode size={17} className="text-white/50" />
           </div>
           <div>
-            <p className="text-sm font-bold text-white">Have a booking code?</p>
+            <p className="text-sm font-bold text-gray-100">Have a booking code?</p>
             <p className="text-xs text-white/40">Tap to load selections instantly</p>
           </div>
         </div>
-        <ChevronRight size={18} className="shrink-0 text-white/25" />
+        <ChevronRight size={20} className="shrink-0 text-orange-400" />
       </button>
     );
   }
@@ -363,7 +363,7 @@ export default function Slip({ onBrowseMatches }) {
 
   return (
     <div
-      className="min-h-screen w-full bg-[#0a0e17] text-white"
+      className="min-h-screen w-full bg-gray-900 text-white"
       style={{ fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}
     >
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');`}</style>
